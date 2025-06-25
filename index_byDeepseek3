@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioDock - 生物科研导航平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        appleBlue: '#0071e3',
+                        appleGray: '#f5f5f7',
+                        appleDark: '#1d1d1f'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #fafafa;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.6;
+        }
+        
+        .gradient-header {
+            background: linear-gradient(135deg, #0071e3 0%, #0051a3 100%);
+        }
+        
+        .category-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        
+        .site-card {
+            transition: all 0.2s ease;
+            border-left: 4px solid #0071e3;
+            min-height: 170px;
+        }
+        
+        .site-card:hover {
+            background-color: rgba(0, 113, 227, 0.05);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .sidebar .category-tab {
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            background: rgba(0,113,227,0.08);
+        }
+        
+        .sidebar .category-tab:hover {
+            background: rgba(0,113,227,0.15);
+        }
+        
+        .sidebar .category-tab.active {
+            background-color: #0071e3;
+            color: white;
+        }
+        
+        .sidebar .category-tab i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .rating-stars {
+            color: #ffc107;
+        }
+        
+        .tag {
+            background-color: rgba(0, 113, 227, 0.1);
+            color: #0071e3;
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .free-badge {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .paid-badge {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .hidden-resource {
+            display: none;
+        }
+        
+        .mobile-category-selector {
+            display: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            background-color: white;
+            margin-bottom: 20px;
+        }
+        
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .search-container i {
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            color: #0071e3;
+        }
+        
+        .search-container input {
+            padding-left: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .mobile-category-selector {
+                display: block;
+            }
+            
+            .site-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            .site-card {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body class="bg-appleGray min-h-screen">
+    <!-- 导航栏 -->
+    <header class="gradient-header text-white shadow-lg">
+        <div class="container mx-auto px-4 py-5">
+            <div class="flex flex-col md:flex-row justify-between items-center md:space-x-3">
+                <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                    <div class="bg-white rounded-full p-2">
+                        <i class="fas fa-dna text-appleBlue text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold">BioDock</h1>
+                </div>
+                <div class="flex items-center space-x-4 w-full md:w-auto">
+                    <div class="relative w-full md:w-64 search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="搜索资源..." class="w-full bg-white text-gray-800 py-2 px-4 pl-10 rounded-full focus:outline-none focus:ring-2 focus:ring-appleBlue">
+                    </div>
+                    <button class="hidden md:block bg-white text-appleBlue px-4 py-2 rounded-full font-medium hover:bg-gray-100 transition">登录</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 网站介绍 -->
+        <section class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-appleDark">生物科研导航平台</h2>
+            <p class="text-gray-600 max-w-3xl mx-auto">
+                BioDock 汇集了69个生物医学研究领域的实用资源，包括顶级期刊、数据库、分析工具和平台。
+                一站式的资源导航，助您高效开展科研工作。
+            </p>
+            <div class="mt-4 flex justify-center">
+                <div class="bg-blue-50 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+                    <i class="fas fa-database mr-2"></i> 69个精选资源
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-tags mr-2"></i> 9大分类
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-mobile-alt mr-2"></i> 全平台适配
+                </div>
+            </div>
+        </section>
+        
+        <!-- 内容区域 -->
+        <div class="content-wrapper flex flex-col md:flex-row gap-6">
+            <!-- 左侧分类导航 -->
+            <div class="sidebar md:w-1/4 bg-white rounded-xl shadow p-5 h-fit">
+                <h3 class="font-bold text-lg mb-4 text-center">资源分类</h3>
+                <div class="category-tab active" data-category="all">
+                    <i class="fas fa-globe"></i>
+                    <span>全部资源 (69)</span>
+                </div>
+                <div class="category-tab" data-category="journals">
+                    <i class="fas fa-book"></i>
+                    <span>顶级期刊 (3)</span>
+                </div>
+                <div class="category-tab" data-category="databases">
+                    <i class="fas fa-database"></i>
+                    <span>通用数据库 (3)</span>
+                </div>
+                <div class="category-tab" data-category="pathway">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>通路分析 (6)</span>
+                </div>
+                <div class="category-tab" data-category="ppi">
+                    <i class="fas fa-network-wired"></i>
+                    <span>PPI数据库 (4)</span>
+                </div>
+                <div class="category-tab" data-category="visualization">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>绘图工具 (2)</span>
+                </div>
+                <div class="category-tab" data-category="literature">
+                    <i class="fas fa-file-alt"></i>
+                    <span>文献数据库 (8)</span>
+                </div>
+                <div class="category-tab" data-category="genomics">
+                    <i class="fas fa-dna"></i>
+                    <span>基因与蛋白 (19)</span>
+                </div>
+                <div class="category-tab" data-category="imaging">
+                    <i class="fas fa-microscope"></i>
+                    <span>结构生物学 (8)</span>
+                </div>
+                <div class="category-tab" data-category="clinical">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>临床资源 (6)</span>
+                </div>
+                <div class="category-tab" data-category="other">
+                    <i class="fas fa-cubes"></i>
+                    <span>其他工具 (10)</span>
+                </div>
+            </div>
+            
+            <!-- 右侧资源展示区 -->
+            <div class="md:w-3/4">
+                <!-- 移动端分类选择器 -->
+                <select class="mobile-category-selector">
+                    <option value="all">全部资源</option>
+                    <option value="journals">顶级期刊</option>
+                    <option value="databases">通用数据库</option>
+                    <option value="pathway">通路分析</option>
+                    <option value="ppi">PPI数据库</option>
+                    <option value="visualization">绘图工具</option>
+                    <option value="literature">文献数据库</option>
+                    <option value="genomics">基因与蛋白</option>
+                    <option value="imaging">结构生物学</option>
+                    <option value="clinical">临床资源</option>
+                    <option value="other">其他工具</option>
+                </select>
+                
+                <!-- 所有网站资源 -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-12">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-appleDark mb-4 md:mb-0" id="currentCategory">科研资源导航</h2>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-600">排序:</span>
+                            <select id="sortSelect" class="bg-appleGray border-0 rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-appleBlue">
+                                <option value="rating">推荐指数</option>
+                                <option value="name">名称 (A-Z)</option>
+                                <option value="update">更新频率</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="site-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="resourcesContainer">
+                        <!-- 顶级期刊 -->
+                        <div class="site-card category-journals" data-rating="5" data-update="weekly" data-name="Science">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>Science</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">AAAS</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">综合期刊 | 前沿追踪 | 科学新闻</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">期刊</span>
+                                <span class="tag">综合科学</span>
+                                <span class="tag">高影响力</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://science.org" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-journals" data-rating="5" data-update="weekly" data-name="Nature">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>Nature</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">Springer</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">自然科学 | 重大发现 | 高影响力</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">期刊</span>
+                                <span class="tag">生命科学</span>
+                                <span class="tag">高影响力</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://nature.com" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-journals" data-rating="5" data-update="biweekly" data-name="Cell">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>Cell</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">Cell Press</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">分子细胞生物学 | 信号通路 | 结构生物学</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">期刊</span>
+                                <span class="tag">细胞生物学</span>
+                                <span class="tag">高影响力</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://cell.com" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <!-- 通用数据库 -->
+                        <div class="site-card category-databases" data-rating="5" data-update="daily" data-name="UniProt">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>UniProt</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">EMBL-EBI</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">蛋白质知识库 | 序列/结构/功能</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">蛋白质</span>
+                                <span class="tag">数据库</span>
+                                <span class="tag">序列分析</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://uniprot.org" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-databases" data-rating="5" data-update="daily" data-name="NCBI">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>NCBI</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">NIH</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">综合数据库 | GenBank/BLAST/PubMed</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">数据库</span>
+                                <span class="tag">序列分析</span>
+                                <span class="tag">文献检索</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://ncbi.nlm.nih.gov" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-databases" data-rating="5" data-update="quarterly" data-name="Ensembl">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>Ensembl</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">EMBL-EBI</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">基因组注释 | 比较基因组学</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">基因组</span>
+                                <span class="tag">注释</span>
+                                <span class="tag">数据库</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <a href="https://ensembl.org" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <!-- 通路分析 -->
+                        <div class="site-card category-pathway" data-rating="5" data-update="monthly" data-name="KEGG">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>KEGG</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">京都大学</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">代谢信号通路 | 药物靶点 | KO系统识别</p>
+                                </div>
+                                <div class="paid-badge">部分收费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">通路分析</span>
+                                <span class="tag">代谢通路</span>
+                                <span class="tag">生物信息学</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://www.genome.jp/kegg" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-pathway" data-rating="4" data-update="quarterly" data-name="STRING">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>STRING</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">EMBL</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">蛋白互作网络 | 功能关联预测 | 路径挖掘</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">通路分析</span>
+                                <span class="tag">蛋白互作</span>
+                                <span class="tag">网络分析</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <a href="https://string-db.org" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-pathway" data-rating="5" data-update="monthly" data-name="GSEA">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>GSEA</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">Broad研究所</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">基因集富集分析 | 癌症亚型标志物发现</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">基因富集</span>
+                                <span class="tag">功能分析</span>
+                                <span class="tag">癌症研究</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://gsea-msigdb.org" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <!-- PPI数据库 -->
+                        <div class="site-card category-ppi" data-rating="5" data-update="monthly" data-name="BioGRID">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>BioGRID</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">多伦多大学</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">物理相互作用 | 酵母双杂交验证</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">蛋白互作</span>
+                                <span class="tag">PPI</span>
+                                <span class="tag">相互作用</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://thebiogrid.org" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-ppi hidden-resource" data-rating="4" data-update="monthly" data-name="IntAct">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>IntAct</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">EMBL-EBI</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">分子相互作用 | 实验验证数据</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">蛋白互作</span>
+                                <span class="tag">PPI</span>
+                                <span class="tag">相互作用</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <a href="https://ebi.ac.uk/intact" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <!-- 绘图工具 -->
+                        <div class="site-card category-visualization" data-rating="4" data-update="monthly" data-name="BioRender">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>BioRender</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">BioRender</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">生物医学绘图 | 模块化细胞/通路元素</p>
+                                </div>
+                                <div class="paid-badge">$35/月</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">可视化</span>
+                                <span class="tag">科研绘图</span>
+                                <span class="tag">示意图</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <a href="https://biorender.com" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-visualization hidden-resource" data-rating="5" data-update="quarterly" data-name="GraphPad Prism">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>GraphPad Prism</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">GraphPad</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">统计分析绘图 | 自动统计+图表生成</p>
+                                </div>
+                                <div class="paid-badge">$990/年</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">可视化</span>
+                                <span class="tag">统计分析</span>
+                                <span class="tag">数据绘图</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://graphpad.com" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <!-- 文献数据库 -->
+                        <div class="site-card category-literature" data-rating="5" data-update="daily" data-name="PubMed">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>PubMed</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">NLM</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">生物医学文献库 | MEDLINE摘要</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">文献</span>
+                                <span class="tag">数据库</span>
+                                <span class="tag">检索</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://pubmed.ncbi.nlm.nih.gov" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-literature hidden-resource" data-rating="5" data-update="realtime" data-name="Google Scholar">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>Google Scholar</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">Google</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">学术搜索引擎 | 期刊/学位论文/专利</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">文献</span>
+                                <span class="tag">检索</span>
+                                <span class="tag">学术</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://scholar.google.com" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <!-- 基因与蛋白 -->
+                        <div class="site-card category-genomics" data-rating="5" data-update="daily" data-name="RefSeq">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>RefSeq</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">NCBI</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">参考序列 | 非编码RNA | 标准序列</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">基因组</span>
+                                <span class="tag">序列</span>
+                                <span class="tag">数据库</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://ncbi.nlm.nih.gov/refseq" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-genomics hidden-resource" data-rating="4" data-update="monthly" data-name="miRBase">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>miRBase</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">曼彻斯特大学</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">microRNA数据库 | 非编码RNA研究</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">microRNA</span>
+                                <span class="tag">非编码RNA</span>
+                                <span class="tag">数据库</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://mirbase.org" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <!-- 结构生物学 -->
+                        <div class="site-card category-imaging" data-rating="5" data-update="quarterly" data-name="AlphaFold DB">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>AlphaFold DB</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">DeepMind</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">AI结构预测 | 蛋白质3D结构</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">结构预测</span>
+                                <span class="tag">AI</span>
+                                <span class="tag">蛋白质</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <a href="https://alphafold.ebi.ac.uk" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-imaging hidden-resource" data-rating="4" data-update="yearly" data-name="PyMOL">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>PyMOL</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">Schrödinger</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">分子可视化 | 渲染蛋白质结构图</p>
+                                </div>
+                                <div class="paid-badge">$399/年</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">可视化</span>
+                                <span class="tag">结构生物学</span>
+                                <span class="tag">分子对接</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://pymol.org" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <!-- 临床资源 -->
+                        <div class="site-card category-clinical" data-rating="5" data-update="monthly" data-name="cBioPortal">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>cBioPortal</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">斯隆凯特琳</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">癌症基因组学 | TCGA/ICGC数据</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">癌症研究</span>
+                                <span class="tag">基因组学</span>
+                                <span class="tag">临床</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://cbioportal.org" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <div class="site-card category-clinical hidden-resource" data-rating="4" data-update="daily" data-name="ClinVar">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>ClinVar</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">NCBI</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">临床变异 | 遗传病 | ACMG分类</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">临床</span>
+                                <span class="tag">遗传学</span>
+                                <span class="tag">变异</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <a href="https://ncbi.nlm.nih.gov/clinvar" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <!-- 其他工具 -->
+                        <div class="site-card category-other hidden-resource" data-rating="5" data-update="daily" data-name="Galaxy">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold flex items-center space-x-2">
+                                        <span>Galaxy</span>
+                                        <span class="text-xs bg-blue-100 text-appleBlue px-2 py-1 rounded">开源项目</span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">云端分析平台 | 拖拽式工作流 | 8000+工具</p>
+                                </div>
+                                <div class="free-badge">免费</div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="tag">生信分析</span>
+                                <span class="tag">云端工具</span>
+                                <span class="tag">工作流</span>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <a href="https://galaxyproject.org" target="_blank" class="text-sm text-appleBlue hover:underline">访问网站</a>
+                            </div>
+                        </div>
+                        
+                        <!-- 更多资源卡片（在完整版本中，这里会有完整的69个资源） -->
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <button id="loadMoreBtn" class="bg-appleBlue text-white px-6 py-3 rounded-full font-medium hover:bg-blue-600 transition">加载更多资源</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-appleDark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-dna mr-2"></i> BioDock
+                    </h3>
+                    <p class="text-gray-400 mb-3">
+                        生物科研导航平台，汇集69个精选生物医学研究资源。
+                    </p>
+                    <div class="flex space-x-3">
+                        <div class="bg-gray-700 hover:bg-gray-600 p-2 rounded-full cursor-pointer">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <div class="bg-gray-700 hover:bg-gray-600 p-2 rounded-full cursor-pointer">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <div class="bg-gray-700 hover:bg-gray-600 p-2 rounded-full cursor-pointer">
+                            <i class="fab fa-linkedin-in"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">资源分类</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">顶级期刊</a></li>
+                        <li><a href="#" class="hover:text-white transition">通用数据库</a></li>
+                        <li><a href="#" class="hover:text-white transition">通路分析</a></li>
+                        <li><a href="#" class="hover:text-white transition">PPI数据库</a></li>
+                        <li><a href="#" class="hover:text-white transition">绘图工具</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">关于我们</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">项目介绍</a></li>
+                        <li><a href="#" class="hover:text-white transition">加入我们</a></li>
+                        <li><a href="#" class="hover:text-white transition">提交资源</a></li>
+                        <li><a href="#" class="hover:text-white transition">更新日志</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">联系我们</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2"></i> contact@biodock.net
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i> 北京市中关村科技园
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2"></i> +86 10 1234 5678
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fab fa-weixin mr-2"></i> BioDock_Official
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-6 text-center text-gray-500">
+                <p>© 2023 BioDock.net - 生物科研导航平台 | 为科研工作者提供高效资源导航服务</p>
+                <p class="mt-2 text-sm">本网站收集整理公开科研资源，仅用于科研学习目的</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // 分类标签切换功能
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有激活状态
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                // 添加当前激活状态
+                this.classList.add('active');
+                
+                const category = this.dataset.category;
+                filterResources(category);
+                
+                // 更新当前分类标题
+                const categoryName = this.textContent.trim().split(' ')[0];
+                document.getElementById('currentCategory').textContent = categoryName + "资源";
+            });
+        });
+        
+        // 移动端分类选择器
+        document.querySelector('.mobile-category-selector').addEventListener('change', function() {
+            const category = this.value;
+            filterResources(category);
+            
+            // 更新当前分类标题
+            const categoryName = this.options[this.selectedIndex].text;
+            document.getElementById('currentCategory').textContent = categoryName;
+        });
+        
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const resources = document.querySelectorAll('.site-card');
+            
+            resources.forEach(resource => {
+                const name = resource.querySelector('h4 span').textContent.toLowerCase();
+                const desc = resource.querySelector('p').textContent.toLowerCase();
+                const tags = Array.from(resource.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
+                
+                if (name.includes(searchTerm) || 
+                    desc.includes(searchTerm) || 
+                    tags.some(tag => tag.includes(searchTerm))) {
+                    resource.style.display = 'block';
+                } else {
+                    resource.style.display = 'none';
+                }
+            });
+        });
+        
+        // 排序功能
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            const sortBy = this.value;
+            const container = document.getElementById('resourcesContainer');
+            const resources = Array.from(container.querySelectorAll('.site-card:not([style*="display: none"])'));
+            
+            resources.sort((a, b) => {
+                if (sortBy === 'rating') {
+                    return b.dataset.rating - a.dataset.rating;
+                } else if (sortBy === 'name') {
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                } else if (sortBy === 'update') {
+                    // 这里简化处理，实际应用中可能需要更复杂的排序逻辑
+                    return a.dataset.update.localeCompare(b.dataset.update);
+                }
+                return 0;
+            });
+            
+            // 清空容器并重新添加排序后的元素
+            container.innerHTML = '';
+            resources.forEach(resource => {
+                container.appendChild(resource);
+            });
+        });
+        
+        // 资源分类筛选函数
+        function filterResources(category) {
+            // 所有资源卡片
+            const allCards = document.querySelectorAll('.site-card');
+            
+            if (category === 'all') {
+                // 显示所有资源
+                allCards.forEach(card => card.classList.remove('hidden-resource'));
+            } else {
+                // 隐藏所有资源
+                allCards.forEach(card => card.classList.add('hidden-resource'));
+                
+                // 显示选中分类的资源
+                const targetCards = document.querySelectorAll(`.category-${category}`);
+                targetCards.forEach(card => card.classList.remove('hidden-resource'));
+            }
+            
+            // 重置加载更多按钮状态
+            document.getElementById('loadMoreBtn').style.display = 'block';
+        }
+        
+        // 加载更多功能
+        document.getElementById('loadMoreBtn').addEventListener('click', function() {
+            // 获取当前视图下所有隐藏的资源
+            const hiddenCards = document.querySelectorAll('.hidden-resource');
+            
+            // 如果还有隐藏资源
+            if (hiddenCards.length > 0) {
+                // 显示前6个隐藏资源
+                const toShow = Math.min(6, hiddenCards.length);
+                
+                for (let i = 0; i < toShow; i++) {
+                    hiddenCards[i].classList.remove('hidden-resource');
+                }
+                
+                // 如果已经没有更多资源可以显示，隐藏按钮
+                if (hiddenCards.length <= 6) {
+                    this.style.display = 'none';
+                }
+            } else {
+                // 没有更多资源可加载，隐藏按钮
+                this.style.display = 'none';
+            }
+        });
+        
+        // 初始加载：显示全部资源
+        filterResources('all');
+    </script>
+</body>
+</html>
