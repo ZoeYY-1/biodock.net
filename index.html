@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioNavigator - 生物学研究导航</title>
+    <meta name="description" content="专业的生物学研究导航网站，收录科学期刊、数据库、分析工具等生物学研究必备资源">
+    <meta name="keywords" content="生物学,生物信息学,科研导航,期刊数据库,蛋白质,基因,NCBI">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #007AFF;
+            --primary-gray: #8E8E93;
+            --light-gray: #F2F2F7;
+            --dark-gray: #1C1C1E;
+            --white: #FFFFFF;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            color: var(--dark-gray);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #007AFF, #5856D6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: var(--primary-gray);
+            margin-bottom: 20px;
+        }
+
+        /* Language Toggle */
+        .lang-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            background: var(--light-gray);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .lang-btn.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        /* Search */
+        .search-container {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid transparent;
+            border-radius: 25px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        /* Category Navigation */
+        .category-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .category-btn:hover, .category-btn.active {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+
+        .card-title a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+        }
+
+        .card-title a:hover {
+            color: var(--primary-blue);
+        }
+
+        .rating {
+            display: flex;
+            gap: 2px;
+        }
+
+        .star {
+            color: #FFD700;
+            font-size: 1.2em;
+        }
+
+        .card-description {
+            color: var(--primary-gray);
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background: var(--light-gray);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            color: var(--primary-gray);
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            color: var(--primary-gray);
+        }
+
+        .price-tag {
+            background: #34C759;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.8em;
+        }
+
+        .price-tag.paid {
+            background: #FF9500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .logo {
+                font-size: 2em;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .category-nav {
+                gap: 8px;
+            }
+
+            .category-btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            color: var(--primary-gray);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--light-gray);
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="logo">🧬 BioNavigator</h1>
+            <p class="subtitle" data-en="Professional Biology Research Navigation" data-zh="专业生物学研究导航">专业生物学研究导航</p>
+            
+            <div class="lang-toggle">
+                <button class="lang-btn active" onclick="switchLanguage('zh')">中文</button>
+                <button class="lang-btn" onclick="switchLanguage('en')">English</button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="搜索数据库、工具、期刊..." id="searchInput">
+            </div>
+        </header>
+
+        <nav class="category-nav" id="categoryNav">
+            <button class="category-btn active" data-category="all" data-en="All" data-zh="全部">全部</button>
+            <button class="category-btn" data-category="期刊" data-en="Journals" data-zh="期刊">期刊</button>
+            <button class="category-btn" data-category="生物数据库" data-en="Databases" data-zh="数据库">数据库</button>
+            <button class="category-btn" data-category="生物工具" data-en="Tools" data-zh="工具">工具</button>
+            <button class="category-btn" data-category="文献检索" data-en="Literature" data-zh="文献">文献</button>
+            <button class="category-btn" data-category="科研绘图" data-en="Visualization" data-zh="绘图">绘图</button>
+        </nav>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p data-en="Loading..." data-zh="加载中...">加载中...</p>
+        </div>
+
+        <div class="cards-grid" id="cardsGrid">
+            <!-- Cards will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const websiteData = [
+            { category: "期刊", name: "Science", rating: 5, description: "顶尖权威期刊 | 发表原创性研究论文及综述 | 多学科前沿探索 | 拥有35+专业期刊", keywords: ["权威期刊", "多学科"], url: "science.org", organization: "AAAS", price: "订阅", language: "中英双语" },
+            { category: "期刊", name: "Nature", rating: 5, description: "顶级学术期刊 | 发布最新科学重大发现 | 获得综述到原创性研究 | 影响因子常年稳居Top 3", keywords: ["综述范式", "权威期刊"], url: "nature.com", organization: "Springer Nature", price: "订阅", language: "中英双语" },
+            { category: "期刊", name: "Cell", rating: 5, description: "生物学专业期刊 | 聚焦分子及细胞生物学内容 | 计算机细胞生物学介绍 | 癌症前沿研究+分子生物治疗", keywords: ["癌症前沿", "聚焦生物学"], url: "cell.com", organization: "Cell Press", price: "订阅", language: "双中英语" },
+            { category: "生物数据库", name: "UniProt", rating: 5, description: "蛋白质数据库 | 提供蛋白序列/功能/结构数据 | 蛋白功能注释/生物学定义 | 拥有全工作流程的Swiss-Prot专业数据库60万条数据", keywords: ["功能生物", "PTM修饰"], url: "uniprot.org", organization: "EMBL-EBI", price: "免费", language: "全球语言" },
+            { category: "生物数据库", name: "NCBI", rating: 5, description: "国家生物信息中心 | 集成GenBank/BLAST/PubMed | 序列比对/文献检索/获取定位 | Entrez全局检索系统提供高级搜索", keywords: ["一站式服务", "整合获取搜索"], url: "ncbi.nlm.nih.gov", organization: "NIH", price: "免费", language: "全球语言" },
+            { category: "通路分析", name: "ConsensusPathDB", rating: 4, description: "通路提供平台 | 聚合32个通路数据库 | 多种学通路富集分析 | 能够进行计算和分析治疗通路相关性", keywords: ["蛋白质网络", "功能模块"], url: "cpdb.molgen.mpg.de", organization: "马普所", price: "免费", language: "德语" },
+            { category: "通路分析", name: "STRING", rating: 5, description: "蛋白质相互作用网络 | 预测功能相关蛋白 | 计算蛋白通路网络 | 提供实验/文本网络/功能化证据及其他定量分析", keywords: ["PPI网络", "聚类分析"], url: "string-db.org", organization: "EMBL", price: "免费", language: "全球语言" },
+            { category: "通路分析", name: "GSEA", rating: 4, description: "获取集富集工具 | 检测差异表达获取集 | 癌症分型比较差异发现 | 使用MSigDB全部获取集数据库2.5万获取集", keywords: ["比较功能性", "FDR校正"], url: "gsea-msigdb.org", organization: "Broad综合所", price: "免费", language: "帮助页面" },
+            { category: "通路分析", name: "KEGG", rating: 5, description: "生化通路数据库 | 获取代谢生理生化通路 | 计算机细胞生化 | 拥有多种KO及KEGG Orthology比较系统", keywords: ["代谢通路", "计算机细胞"], url: "kegg.jp", organization: "京都大学", price: "部分收费", language: "全球语言" },
+            { category: "通路分析", name: "Reactome", rating: 4, description: "癌症通路分析库 | 专注生物的反应路径 | 通路交互分析 | 系统分解化学反应-生物通路-通路", keywords: ["癌症通路", "免疫反应"], url: "reactome.org", organization: "OICR", price: "免费", language: "德语" },
+            { category: "生物工具", name: "WebLogo 3", rating: 4, description: "序列比较生物绘图 | 化学化比较位点 | 多序列比对结构性显示 | 系统自定义色彩/字体配置及其他功能", keywords: ["进化比较系统", "画图"], url: "weblogo.threeplusone.com", organization: "华盛顿大学", price: "免费", language: "帮助页面" },
+            { category: "生物工具", name: "Galaxy", rating: 5, description: "云端分析平台 | 通过可生物链程序构建 | 教学/重复性分析 | 集成>8000工具(RNA-seq/ChIP-seq)", keywords: ["云端处理", "化学重复"], url: "galaxyproject.org", organization: "开放社群", price: "免费", language: "国际语言" },
+            { category: "科研绘图", name: "GraphPad Prism", rating: 5, description: "统计绘图软件 | 专业化统计分析+统计生物绘图 | 实验数据化学化 | 一键导出高质量EPS/PDF(系统300+期刊格式)", keywords: ["非线性模型拟合", "ROC曲线"], url: "graphpad.com", organization: "GraphPad", price: "$990/用户", language: "帮助页面" },
+            { category: "科研绘图", name: "BioRender", rating: 5, description: "生物医学绘图工具 | 提供模板化生物学/通路图形 | 论文绘图/交互生成 | 拥有免费学/商业版本专业比较库(2万+统计)", keywords: ["手绘绘图", "手工绘图"], url: "biorender.com", organization: "BioRender", price: "$35/月", language: "国际语言" },
+            { category: "文献检索", name: "Google Scholar", rating: 5, description: "学术搜索引擎 | 检索期刊/学位论文发现/专利 | 文献引用 | 免费提供所有功能(专业化全文引用)", keywords: ["全文检索", "免费高效"], url: "scholar.google.com", organization: "Google", price: "免费", language: "简体中文" },
+            { category: "文献检索", name: "PubMed", rating: 5, description: "生物医学文献库 | 检索MEDLINE摘要库 | 开放获取数据库 | 系统MeSH主题词条检索(3,400万文献)", keywords: ["原创搜索", "分子生物"], url: "pubmed.ncbi.nlm.nih.gov", organization: "NLM", price: "免费", language: "全球语言" }
+        ];
+
+        let currentLanguage = 'zh';
+        let currentCategory = 'all';
+        let filteredData = websiteData;
+
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update text content
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-zh');
+            });
+            
+            // Update search placeholder
+            const searchInput = document.getElementById('searchInput');
+            searchInput.placeholder = lang === 'en' ? 'Search databases, tools, journals...' : '搜索数据库、工具、期刊...';
+            
+            renderCards();
+        }
+
+        function filterByCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            filteredData = category === 'all' ? websiteData : websiteData.filter(item => item.category === category);
+            renderCards();
+        }
+
+        function searchWebsites(query) {
+            if (!query.trim()) {
+                filteredData = currentCategory === 'all' ? websiteData : websiteData.filter(item => item.category === currentCategory);
+            } else {
+                const searchTerm = query.toLowerCase();
+                filteredData = websiteData.filter(item => 
+                    (currentCategory === 'all' || item.category === currentCategory) &&
+                    (item.name.toLowerCase().includes(searchTerm) ||
+                     item.description.toLowerCase().includes(searchTerm) ||
+                     item.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm)) ||
+                     item.organization.toLowerCase().includes(searchTerm))
+                );
+            }
+            renderCards();
+        }
+
+        function renderCards() {
+            const container = document.getElementById('cardsGrid');
+            container.innerHTML = '';
+            
+            filteredData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                const stars = '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating);
+                const priceClass = item.price === '免费' ? 'price-tag' : 'price-tag paid';
+                const priceText = currentLanguage === 'en' && item.price === '免费' ? 'Free' : item.price;
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">
+                                <a href="https://${item.url}" target="_blank">${item.name}</a>
+                            </h3>
+                            <div class="rating">
+                                ${stars}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="card-description">${item.description}</p>
+                    <div class="card-tags">
+                        ${item.keywords.map(keyword => `<span class="tag">${keyword}</span>`).join('')}
+                    </div>
+                    <div class="card-footer">
+                        <span>${item.organization}</span>
+                        <span class="${priceClass}">${priceText}</span>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchWebsites(e.target.value);
+        });
+
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                filterByCategory(e.target.getAttribute('data-category'));
+            });
+        });
+
+        // Initialize
+        renderCards();
+    </script>
+</body>
+</html>
